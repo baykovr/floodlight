@@ -1,5 +1,18 @@
-Test.
 
+#### Installation
+See http://www.projectfloodlight.org/getting-started/
+
+    git clone git://github.com/baykovr/floodlight.git 
+    cd floodlight 
+    git checkout stable 
+    ant; 
+    sudo mkdir /var/lib/floodlight 
+    sudo chmod 777 /var/lib/floodlight
+
+#### Running
+    java -jar target/floodlight.jar
+
+#### Original README
 Floodlight is the leading open source SDN controller. It is supported by a community of developers including a number of engineers from Big Switch Networks (http://www.bigswitch.com/).
 
 OpenFlow is a open standard managed by Open Networking Foundation. It specifies a protocol through switch a remote controller can modify the behavior of networking devices through a well-defined “forwarding instruction set”. Floodlight is designed to work with the growing number of switches, routers, virtual switches, and access points that support the OpenFlow standard.
