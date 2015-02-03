@@ -4,8 +4,7 @@ See http://www.projectfloodlight.org/getting-started/
 
     git clone git://github.com/baykovr/floodlight.git 
     cd floodlight 
-    git checkout stable 
-    ant; 
+    # ant; OR make 
     sudo mkdir /var/lib/floodlight 
     sudo chmod 777 /var/lib/floodlight
 
