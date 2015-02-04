@@ -9,7 +9,38 @@ See http://www.projectfloodlight.org/getting-started/
     sudo chmod 777 /var/lib/floodlight
 
 #### Running
+    # cd to /floodlight (project root directory)
     java -jar target/floodlight.jar
+
+
+#### Modules
+
+Decide on a module namespace and module name, example 
+
+    namespace : net.floodlightcontroller.proto_mod
+    module    : ProtoMod
+    full path : net.floodlightcontroller.proto_mod.ProtoMod
+
+##### Step 1 : Create Source Files    
+Create a directory under floodlight/src/main/java/net/floodlightcontroller/proto_mod
+Create a new source file in the directory, ProtoMod.java
+
+##### Step 2 : Add Module to configuration
+
+You'll need to make one entry in two configuarion files.
+
+
+    floodlight/src/main/resources/META-INF/services/net.floodlightcontroller.core.module.IFloodlightModule
+		[+ add] "net.floodlightcontroller.proto_mod.ProtoMod"
+    
+    floodlight/src/main/resources/floodlightdefault.properties
+        [+  add] "net.floodlightcontroller.proto_mod.ProtoMod,\" 
+        [? note] you'll have to insert this line after the other modules, not at the end.
+        
+##### Compile and Run
+	 # cd back to /floodlight (project root directory)
+     make 
+     java -jar target/floodlight.jar
 
 #### Original README
 Floodlight is the leading open source SDN controller. It is supported by a community of developers including a number of engineers from Big Switch Networks (http://www.bigswitch.com/).
