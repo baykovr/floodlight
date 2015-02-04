@@ -42,6 +42,12 @@ You'll need to make one entry in two configuarion files.
      make 
      java -jar target/floodlight.jar
 
+
+#### Eclipse/IntelliJ Intergration
+
+     ant eclipse
+     IDEA > open project > floodlight (project root directory)
+     
 #### Original README
 Floodlight is the leading open source SDN controller. It is supported by a community of developers including a number of engineers from Big Switch Networks (http://www.bigswitch.com/).
 
