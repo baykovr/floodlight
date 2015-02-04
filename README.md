@@ -47,7 +47,16 @@ You'll need to make one entry in two configuarion files.
 
      ant eclipse
      IDEA > open project > floodlight (project root directory)
-     
+
+#### Using Mininet
+
+The easiest way to start testing the controller is by using mininet. https://github.com/mininet/mininet
+The default topology should be good enough for simple testing, use ping to test connectivity between host 1 (h1) and host 2
+(h2)
+
+    sudo mn --controller remote,ip=127.0.0.1,port=6653
+    mininet>h1 ping h2
+
 #### Original README
 Floodlight is the leading open source SDN controller. It is supported by a community of developers including a number of engineers from Big Switch Networks (http://www.bigswitch.com/).
 

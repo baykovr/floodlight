@@ -24,4 +24,5 @@ net.floodlightcontroller.loadbalancer.LoadBalancer
 net.floodlightcontroller.linkdiscovery.internal.LinkDiscoveryManager
 net.floodlightcontroller.devicemanager.internal.DeviceManagerImpl
 net.floodlightcontroller.firewall.Firewall
-net.floodlightcontroller.proto_mod.ProtoMod
+net.floodlightcontroller.fresco.FrescoEngine
+net.floodlightcontroller.fresco.FrescoLog
