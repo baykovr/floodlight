@@ -3,8 +3,10 @@ package net.floodlightcontroller.fresco;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import net.floodlightcontroller.core.IFloodlightProviderService;
+
 import org.projectfloodlight.openflow.protocol.OFMessage;
 import org.projectfloodlight.openflow.protocol.OFType;
 
@@ -19,10 +21,20 @@ import net.floodlightcontroller.core.module.IFloodlightService;
 /* Log incoming packets/messages for debugging purposes. */
 
 public class FrescoLog implements IFloodlightModule, IOFMessageListener {
+	
+	protected IFloodlightProviderService floodlightProvider;
+	
+	private static final Logger log = Logger.getLogger( FrescoLog.class.getName());
+	
+	// TODO : Specify types to log in fresco core.
+	protected final OFType[] OFTypes_toLog = new OFType[]
+	{
+			OFType.PACKET_IN
+	};
+	
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
-        return null;
+        return FrescoLog.class.getName();
     }
 
     @Override
@@ -39,8 +51,9 @@ public class FrescoLog implements IFloodlightModule, IOFMessageListener {
 
     @Override
     public net.floodlightcontroller.core.IListener.Command receive(
-            IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
-        // TODO Auto-generated method stub
+            IOFSwitch sw, OFMessage msg, FloodlightContext cntx) 
+    {
+       log.info("[ PKT ] got a new packet");
         return null;
     }
 
@@ -52,6 +65,7 @@ public class FrescoLog implements IFloodlightModule, IOFMessageListener {
     
     @Override
     public Collection<Class<? extends IFloodlightService>> getModuleDependencies() {
+    	// Add ourself to module loading system
         Collection<Class<? extends IFloodlightService>> l =
                 new ArrayList<Class<? extends IFloodlightService>>();
         l.add(IFloodlightProviderService.class);
@@ -67,12 +81,23 @@ public class FrescoLog implements IFloodlightModule, IOFMessageListener {
     @Override
     public void init(FloodlightModuleContext context)
             throws FloodlightModuleException {
-        // TODO Auto-generated method stub
+    	floodlightProvider = context.getServiceImpl(IFloodlightProviderService.class);
     }
 
     @Override
-    public void startUp(FloodlightModuleContext context) {
-        // TODO Auto-generated method stub
+    public void startUp(FloodlightModuleContext context) 
+    {
+    	for( OFType OFType_toLog: OFTypes_toLog)
+    	{
+    		try
+    		{
+        		floodlightProvider.addOFMessageListener(OFType_toLog, this);
+        	}
+        	catch (Exception e)
+    		{
+        		log.severe("[erro] adding "+OFType_toLog.toString()+" message listener : "+e);
+        	}
+    	}
     }
 }
 

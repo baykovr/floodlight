@@ -17,7 +17,7 @@ import net.floodlightcontroller.core.module.IFloodlightModule;
 import net.floodlightcontroller.core.module.IFloodlightService;
 
 
-public class FrescoEngine implements IFloodlightModule, IOFMessageListener {
+public class FrescoCore implements IFloodlightModule, IOFMessageListener {
 
     @Override
     public String getName() {
