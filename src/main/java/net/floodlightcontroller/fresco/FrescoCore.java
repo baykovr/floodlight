@@ -1,10 +1,14 @@
 package net.floodlightcontroller.fresco;
 
+import java.io.File;
+import java.io.FileReader;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 
 import net.floodlightcontroller.core.IFloodlightProviderService;
+
 import org.projectfloodlight.openflow.protocol.OFMessage;
 import org.projectfloodlight.openflow.protocol.OFType;
 
@@ -72,7 +76,36 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener {
     }
 
     @Override
-    public void startUp(FloodlightModuleContext context) {
-        
+    public void startUp(FloodlightModuleContext context) 
+    {
+    	try
+    	{
+    		readScript("/home/baykovr/Git/nuovo-fresco/test-script.fre");
+    	}
+    	catch(Exception e)
+    	{
+    		
+    	}
+    }
+    private void readScript(String filename)
+    {
+    	// TODO : Non-Static Loading etc...
+	   File file = new File(filename); //for ex foo.txt
+	   try 
+	   {
+		   String content = "";
+		   Scanner fscanner = new Scanner(file);
+		   while(fscanner.hasNextLine())
+		   {
+			   content = fscanner.nextLine();
+		   }
+	       fscanner.close();
+	       
+	       System.out.printf("[....] %s\n", content);
+	   }
+	   catch (Exception e) 
+	   {
+	       System.out.printf("[erro] %s : %s \n",filename,e);
+	   }
     }
 }

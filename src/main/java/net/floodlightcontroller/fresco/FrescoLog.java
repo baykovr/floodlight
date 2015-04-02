@@ -26,7 +26,7 @@ public class FrescoLog implements IFloodlightModule, IOFMessageListener {
 	
 	private static final Logger log = Logger.getLogger( FrescoLog.class.getName());
 	
-	// TODO : Specify types to log in fresco core.
+	// TODO : Specify types to log in FRESCO core.
 	protected final OFType[] OFTypes_toLog = new OFType[]
 	{
 			OFType.PACKET_IN
