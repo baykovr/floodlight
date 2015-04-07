@@ -18,13 +18,15 @@ import net.floodlightcontroller.core.module.FloodlightModuleException;
 import net.floodlightcontroller.core.module.IFloodlightModule;
 import net.floodlightcontroller.core.module.IFloodlightService;
 
-/* Log incoming packets/messages for debugging purposes. */
+/* 
+ * FrescoOFLog : Log OpenFlow messages 
+ * */
 
-public class FrescoLog implements IFloodlightModule, IOFMessageListener {
+public class FrescoOFLog implements IFloodlightModule, IOFMessageListener {
 	
 	protected IFloodlightProviderService floodlightProvider;
 	
-	private static final Logger log = Logger.getLogger( FrescoLog.class.getName());
+	private final Logger log = Logger.getLogger( FrescoOFLog.class.getName());
 	
 	// TODO : Specify types to log in FRESCO core.
 	protected final OFType[] OFTypes_toLog = new OFType[]
@@ -34,7 +36,7 @@ public class FrescoLog implements IFloodlightModule, IOFMessageListener {
 	
     @Override
     public String getName() {
-        return FrescoLog.class.getName();
+        return FrescoOFLog.class.getName();
     }
 
     @Override
@@ -54,7 +56,7 @@ public class FrescoLog implements IFloodlightModule, IOFMessageListener {
             IOFSwitch sw, OFMessage msg, FloodlightContext cntx) 
     {
        log.info("[ PKT ] got a new packet");
-        return null;
+       return Command.CONTINUE;
     }
 
     @Override

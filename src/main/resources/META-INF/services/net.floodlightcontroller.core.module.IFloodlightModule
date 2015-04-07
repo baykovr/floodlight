@@ -25,4 +25,4 @@ net.floodlightcontroller.linkdiscovery.internal.LinkDiscoveryManager
 net.floodlightcontroller.devicemanager.internal.DeviceManagerImpl
 net.floodlightcontroller.firewall.Firewall
 net.floodlightcontroller.fresco.FrescoCore
-net.floodlightcontroller.fresco.FrescoLog
+net.floodlightcontroller.fresco.FrescoOFLog

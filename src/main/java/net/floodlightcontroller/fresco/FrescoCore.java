@@ -22,11 +22,14 @@ import net.floodlightcontroller.core.module.IFloodlightService;
 
 
 public class FrescoCore implements IFloodlightModule, IOFMessageListener {
-
+	
+	private FrescoParser fParser;
+	private FrescoLogger fLogger;
+	private FrescoModuleManager fModManager;
+	
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
-        return null;
+        return FrescoCore.class.getName();
     }
 
     @Override
@@ -67,45 +70,58 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener {
         return null;
     }
 
-
-
     @Override
     public void init(FloodlightModuleContext context)
-            throws FloodlightModuleException {
-        // TODO Auto-generated method stub
+            throws FloodlightModuleException 
+    {
+    	/*
+    	 * Core init
+    	 * */
+    	fLogger = new FrescoLogger();
+    	fParser = new FrescoParser(fLogger);
+    	fModManager = new FrescoModuleManager();
+    	
+    	fLogger.logInfo("init");
     }
 
     @Override
     public void startUp(FloodlightModuleContext context) 
     {
+    	if(fLogger!=null)
+    	{
+    		fLogger.logInfo("startup");
+    	}
+    	else if (fModManager!=null)
+    	{
+    		// TODO Module Loading
+    		FrescoModule_PortCheck portchecker = new FrescoModule_PortCheck("module_portcmd");
+    		if(portchecker!=null)
+    		{
+    			fModManager.add(portchecker);
+    		}
+    		else
+    		{
+    			fLogger.logErro("failed to load portchecker");
+    		}
+    	}
+    	else
+    	{
+    		System.out.println("FRESCO CRITICAL : "
+    				+ "One or more core components is unavailable");
+    	}
+    	
     	try
     	{
-    		readScript("/home/baykovr/Git/nuovo-fresco/test-script.fre");
+    		fParser.parse("/home/baykovr/Git/nuovo-fresco/test-script.fre");
+    		// Load Script
+    		// Script Determines which modules to load
+    		// load modules
+    		// run
+    		
     	}
     	catch(Exception e)
     	{
     		
     	}
-    }
-    private void readScript(String filename)
-    {
-    	// TODO : Non-Static Loading etc...
-	   File file = new File(filename); //for ex foo.txt
-	   try 
-	   {
-		   String content = "";
-		   Scanner fscanner = new Scanner(file);
-		   while(fscanner.hasNextLine())
-		   {
-			   content = fscanner.nextLine();
-		   }
-	       fscanner.close();
-	       
-	       System.out.printf("[....] %s\n", content);
-	   }
-	   catch (Exception e) 
-	   {
-	       System.out.printf("[erro] %s : %s \n",filename,e);
-	   }
     }
 }
