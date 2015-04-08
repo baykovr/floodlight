@@ -41,7 +41,8 @@ public @interface FloodlightModulePriority {
         NORMAL(40),
         DEFAULT_PROVIDER(50),
         HIGH(60),
-        EXTRA_HIGH(70);
+        EXTRA_HIGH(70),
+        MAXIMUM(100);
 
         private final int value;
         

@@ -1,4 +1,4 @@
-package net.floodlightcontroller.fresco;
+package net.floodlightcontroller.fresco.modules;
 
 /*
  * FRESCO Module Specification

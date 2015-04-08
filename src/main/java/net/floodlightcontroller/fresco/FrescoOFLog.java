@@ -22,17 +22,12 @@ import net.floodlightcontroller.core.module.IFloodlightService;
  * FrescoOFLog : Log OpenFlow messages 
  * */
 
-public class FrescoOFLog implements IFloodlightModule, IOFMessageListener {
+public class FrescoOFLog implements IFloodlightModule, IOFMessageListener, IFrescoEvents {
 	
 	protected IFloodlightProviderService floodlightProvider;
 	
 	private final Logger log = Logger.getLogger( FrescoOFLog.class.getName());
 	
-	// TODO : Specify types to log in FRESCO core.
-	protected final OFType[] OFTypes_toLog = new OFType[]
-	{
-			OFType.PACKET_IN
-	};
 	
     @Override
     public String getName() {
@@ -89,7 +84,7 @@ public class FrescoOFLog implements IFloodlightModule, IOFMessageListener {
     @Override
     public void startUp(FloodlightModuleContext context) 
     {
-    	for( OFType OFType_toLog: OFTypes_toLog)
+    	for( OFType OFType_toLog : FR_OF_MsgTypes)
     	{
     		try
     		{

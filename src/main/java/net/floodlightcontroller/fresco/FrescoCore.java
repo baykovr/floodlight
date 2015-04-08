@@ -1,11 +1,8 @@
 package net.floodlightcontroller.fresco;
 
-import java.io.File;
-import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
 
 import net.floodlightcontroller.core.IFloodlightProviderService;
 
@@ -15,17 +12,20 @@ import org.projectfloodlight.openflow.protocol.OFType;
 import net.floodlightcontroller.core.FloodlightContext;
 import net.floodlightcontroller.core.IOFMessageListener;
 import net.floodlightcontroller.core.IOFSwitch;
+import net.floodlightcontroller.core.IListener.Command;
 import net.floodlightcontroller.core.module.FloodlightModuleContext;
 import net.floodlightcontroller.core.module.FloodlightModuleException;
 import net.floodlightcontroller.core.module.IFloodlightModule;
 import net.floodlightcontroller.core.module.IFloodlightService;
 
 
-public class FrescoCore implements IFloodlightModule, IOFMessageListener {
+public class FrescoCore implements IFloodlightModule, IOFMessageListener, IFrescoEvents {
 	
 	private FrescoParser fParser;
 	private FrescoLogger fLogger;
 	private FrescoModuleManager fModManager;
+	
+	protected IFloodlightProviderService floodlightProvider;
 	
     @Override
     public String getName() {
@@ -48,7 +48,11 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener {
     public net.floodlightcontroller.core.IListener.Command receive(
             IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
         // TODO Auto-generated method stub
-        return null;
+    	
+    	// onReceive we must return: CONTINUE || STOP 
+    	// (optionally) issue open flow message
+    	
+    	return Command.CONTINUE;
     }
 
     @Override
@@ -60,8 +64,10 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener {
     @Override
     public Collection<Class<? extends IFloodlightService>> getModuleDependencies() 
     {
-        // TODO Auto-generated method stub
-        return null;
+    	 Collection<Class<? extends IFloodlightService>> l =
+                 new ArrayList<Class<? extends IFloodlightService>>();
+         l.add(IFloodlightProviderService.class);
+         return l;
     }
     
     @Override
@@ -74,14 +80,13 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener {
     public void init(FloodlightModuleContext context)
             throws FloodlightModuleException 
     {
-    	/*
-    	 * Core init
-    	 * */
+    	floodlightProvider = context.getServiceImpl(IFloodlightProviderService.class);
+    	
     	fLogger = new FrescoLogger();
     	fParser = new FrescoParser(fLogger);
     	fModManager = new FrescoModuleManager();
     	
-    	fLogger.logInfo("init");
+    	fLogger.logInfo("CORE","init");
     }
 
     @Override
@@ -89,39 +94,51 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener {
     {
     	if(fLogger!=null)
     	{
-    		fLogger.logInfo("startup");
+    		fLogger.logInfo("CORE","startup");
     	}
     	else if (fModManager!=null)
     	{
-    		// TODO Module Loading
-    		FrescoModule_PortCheck portchecker = new FrescoModule_PortCheck("module_portcmd");
-    		if(portchecker!=null)
-    		{
-    			fModManager.add(portchecker);
-    		}
-    		else
-    		{
-    			fLogger.logErro("failed to load portchecker");
-    		}
+    		// Attempt to build call graph from file
+    		FrescoCallGraph cg_from_script;
+    		try
+        	{
+    			cg_from_script = fParser.parse("/home/baykovr/Git/nuovo-fresco/test-script.fre");
+    			if(cg_from_script != null)
+    			{
+    				fModManager.set_callgraph(cg_from_script);
+    			}
+        	}
+        	catch(Exception e)
+        	{
+        		fLogger.logErro("CORE"," call graph failure : "+e);
+        	}
     	}
     	else
     	{
-    		System.out.println("FRESCO CRITICAL : "
-    				+ "One or more core components is unavailable");
+    		fLogger.logErro("FRESCO CORE CRT","failure. ");
+    		if(fLogger == null)
+    		{
+    			fLogger.logErro("FRESCO CORE DBG","failed to initiallize logger.");
+    			
+    		}
+    		if(fModManager == null)
+    		{
+    			fLogger.logErro("FRESCO CORE DBG","failed to initiallize fresco module manager.");
+    		}
+    		return; //do not register event listeners.
     	}
     	
-    	try
+    	/*Register OFMessageListeners*/
+    	for( OFType OFType_toLog: FR_OF_MsgTypes)
     	{
-    		fParser.parse("/home/baykovr/Git/nuovo-fresco/test-script.fre");
-    		// Load Script
-    		// Script Determines which modules to load
-    		// load modules
-    		// run
-    		
-    	}
-    	catch(Exception e)
-    	{
-    		
+    		try
+    		{
+        		floodlightProvider.addOFMessageListener(OFType_toLog, this);
+        	}
+        	catch (Exception e)
+    		{
+        		fLogger.logErro("CORE",OFType_toLog.toString()+" message listener : "+e);
+        	}
     	}
     }
 }

@@ -18,16 +18,16 @@ public class FrescoLogger
 	{
 		log = Logger.getLogger( FrescoLogger.class.getName());
 	}
-	public void logInfo(String msg)
+	public void logInfo(String where, String msg)
 	{
-		log.info(preamble+msg);
+		log.info(preamble+" "+where+" "+msg);
 	}
-	public void logWarn(String msg)
+	public void logWarn(String where, String msg)
 	{
-		log.warning(preamble+msg);
+		log.warning(preamble+" "+where+" "+msg);
 	}
-	public void logErro(String msg)
+	public void logErro(String where, String msg)
 	{
-		log.severe(preamble+msg);
+		log.severe(preamble+" "+where+" "+msg);
 	}
 }

@@ -15,6 +15,8 @@ public class FrescoParser
 {
 	private FrescoLogger log;
 	
+	private FrescoCallGraph callgraph;
+	
 	private Pattern mod_name_re       = Pattern.compile("_(.*)");
 	private Pattern mod_line_re       = Pattern.compile("(.*):(.*)");
 	private Pattern action_exp_re     = Pattern.compile("(.*):(.*):(.*)");
@@ -23,21 +25,23 @@ public class FrescoParser
 	// ternary_re (left section) ? (right section)
 	// ternary_left_re (lOperand)(operators)(rOperand)
 
-	// TODO : Split left and right operand cases
-	private Pattern action_ternary_re = Pattern.compile("(.*)\\?(.*):(.*)");
-	
-	private Pattern action_ternary_left_re = Pattern.compile("(.*)(==|>|<)(.*)");
+	private Pattern ternary_re       = Pattern.compile("(.*)\\?(.*)");	
+	private Pattern ternary_left_re  = Pattern.compile("(.*)(==|>|<)(.*)");
+	private Pattern ternary_right_re = Pattern.compile("(.*):(.*)");
 	
 	private Matcher matcher; 
 	
 	public FrescoParser(FrescoLogger log)
 	{
 		this.log = log;
+		callgraph = new FrescoCallGraph();
 	}
-	public void parse(String filename)
+	public FrescoCallGraph parse(String filename)
 	{
 		readScriptFile(filename);
 		
+		// construct callgraph
+		return callgraph;
 	}
 	private Scanner parse_module(Scanner fscanner)
 	{
@@ -86,29 +90,46 @@ public class FrescoParser
 					System.out.println("DEBUG: action type : "+action_type);
 					switch(action_type)
 					{
-					case "raise_event":
+					case "call":
 					{
-						// event name = matcher.group(2).trim();
+						// call module named = matcher.group(2).trim();
+						
 						break;
 					}
 					case "eval":
 					{
-						matcher = action_ternary_re.matcher(line);
-						if(matcher.find())
+						matcher = ternary_re.matcher(line);
+						if(matcher.find()) // valid ternary expression
 						{
-							String ternary_lval = matcher.group(1).trim(); 
-							String ternary_mval = matcher.group(2).trim();
-							String ternary_rval = matcher.group(3).trim();
+							String ternary_left  = matcher.group(1).trim(); 
+							String ternary_right = matcher.group(2).trim();
 							
-							matcher = action_ternary_left_re.matcher(ternary_lval);
-							
+							// Parse conditional
+							matcher = ternary_left_re.matcher(ternary_left);
 							if(matcher.find())
 							{
-								System.out.println(matcher.group(1).trim()); 
-								System.out.println(matcher.group(2).trim());
-								System.out.println(matcher.group(3).trim());
+								String loperand = matcher.group(1).trim();
+								String operator = matcher.group(2).trim();
+								String roperand = matcher.group(3).trim();
+								
+								System.out.println(); 
+							}
+							else
+							{
+								System.out.println("failed to parse ternary left");
 							}
 							
+							// Parse eval logic
+							matcher = ternary_right_re.matcher(ternary_right);
+							if(matcher.find())
+							{
+								String eval_if_true  = matcher.group(1).trim();
+								String eval_if_false = matcher.group(2).trim();
+							}
+							else
+							{
+								System.out.println("failed to parse ternary right");
+							}
 						}
 						else
 						{
@@ -170,7 +191,7 @@ public class FrescoParser
 //					   {
 //						   
 //					   }
-					   log.logInfo("module declaration "+line); 
+					   log.logInfo("PARSER","module declaration "+line); 
 				   }
 			   }
 		   }
@@ -180,7 +201,7 @@ public class FrescoParser
 	   }
 	   catch (Exception e) 
 	   {
-	       log.logErro(filename+" : "+e);
+	       log.logErro("PARSER",filename+" : "+e);
 	   }
 	}
 }
