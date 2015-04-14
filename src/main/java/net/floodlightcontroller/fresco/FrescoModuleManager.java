@@ -18,23 +18,36 @@ import net.floodlightcontroller.fresco.modules.AbstractFrescoModule;
 public class FrescoModuleManager 
 {
 	private ArrayList<AbstractFrescoModule> modules;
-	private FrescoCallGraph callgraph;
+	private FrescoCallGraph callGraph;
+	private FrescoLogger fLogger;
 	
-	public FrescoModuleManager()
+	public FrescoModuleManager(FrescoLogger flogger)
 	{
-		
+		fLogger = flogger;
 	}
 	
 	public void set_callgraph(FrescoCallGraph callgraph)
 	{
-		this.callgraph = callgraph;
+		this.callGraph = callgraph;
+	}
+	
+	public void process_callgraphs()
+	{
+		// Print Modules
+		for(String moduleName : callGraph.modCallOrder)
+		{
+			fLogger.logInfo("ModManager", "have module "+moduleName);
+			//check if we have abstractmodule to match...
+		}
+		
 	}
 	
 	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx)
 	{
-		if(callgraph != null)
+		if(callGraph != null)
 		{
-			// process call graph
+			// find modules with hook points and run them
+			
 		}
 		return Command.CONTINUE;
 	}

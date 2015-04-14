@@ -9,9 +9,23 @@ import net.floodlightcontroller.fresco.modules.FrescoModuleAttribute;
 
 public class FrescoCallGraph 
 {
-	protected HashMap<String,String> valueTable;
+	// Order in which modules are executed
 	protected ArrayList<String> modCallOrder;
-	protected HashMap<String,FrescoModuleAttribute> modNameAttrMap;
+	
+	// Table of variables, name and values
+	// which the modules will update/reference
+	protected HashMap<String,String> valueTable;
+	
+	// Map variable name (from valueTable) to moduleAttribute
+	// for example, a valueTable entry a is the attribute input of module B
+	protected HashMap<String,FrescoModuleAttribute> modNameAttributeMap;
+	
+	public FrescoCallGraph()
+	{
+		modCallOrder      = new ArrayList<String>();
+		valueTable        = new HashMap<String,String>();
+		modNameAttributeMap = new HashMap<String,FrescoModuleAttribute>();
+	}
 	
 	public void add_var(String variable)
 	{
@@ -20,15 +34,25 @@ public class FrescoCallGraph
 			valueTable.put(variable,null);
 		}
 	}
-	public void update_var_value(String variable,String value)
+	
+	public void update_var(String variable,String value)
 	{
 		if(valueTable.containsKey(variable))
 		{
 			valueTable.put(variable,value);
 		}
 	}
-	public void mapModNameAttr(String modName,String modAttrName,String modAttrValue)
+	
+	public void addModuleAttributeMap(String moduleName,String modAttrName,String modAttrValue)
 	{
-		modNameAttrMap.put(modName,new FrescoModuleAttribute(modAttrName,modAttrValue));
+		if( moduleName.isEmpty()  ||modAttrName.isEmpty() || modAttrValue.isEmpty())
+		{
+			System.out.println("Warning: null/empty attribute name/value in script.");
+			//TODO : Additional logging, print variables...
+		}
+		else
+		{
+			modNameAttributeMap.put(moduleName,new FrescoModuleAttribute(modAttrName,modAttrValue));
+		}
 	}
 }

@@ -25,6 +25,8 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener, IFresc
 	private FrescoLogger fLogger;
 	private FrescoModuleManager fModManager;
 	
+	private boolean core_ready;
+	
 	protected IFloodlightProviderService floodlightProvider;
 	
     @Override
@@ -80,53 +82,79 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener, IFresc
     public void init(FloodlightModuleContext context)
             throws FloodlightModuleException 
     {
+    	 
+    	
     	floodlightProvider = context.getServiceImpl(IFloodlightProviderService.class);
+    	fLogger            = new FrescoLogger();
+    	fParser            = new FrescoParser(fLogger);
+    	fModManager        = new FrescoModuleManager(fLogger);
+    	core_ready         = true;
     	
-    	fLogger = new FrescoLogger();
-    	fParser = new FrescoParser(fLogger);
-    	fModManager = new FrescoModuleManager();
+    	// Verify components initialized properly
+		if(fLogger == null)
+		{
+			fLogger.logErro("FRESCO CORE DBG","failed to initiallize logger.");
+			core_ready = false;
+			System.out.println("FRESCO CRITIAL Logger Creation Failed!");
+		}
+		else
+		{
+			fLogger.logInfo("CORE","initialization...");
+		}
+		
+		if(fParser == null)
+		{
+			fLogger.logErro("FRESCO CORE DBG","failed to initiallize parser.");
+			core_ready = false;
+		}
+		if(fModManager == null)
+		{
+			fLogger.logErro("FRESCO CORE DBG","failed to initiallize fresco module manager.");
+			core_ready = false;
+		}
+
     	
-    	fLogger.logInfo("CORE","init");
     }
 
     @Override
     public void startUp(FloodlightModuleContext context) 
     {
-    	if(fLogger!=null)
+    	String scriptFile = "/home/baykovr/Git/nuovo-fresco/test-script.fre";
+    	
+    	if(!core_ready)
     	{
-    		fLogger.logInfo("CORE","startup");
-    	}
-    	else if (fModManager!=null)
-    	{
-    		// Attempt to build call graph from file
-    		FrescoCallGraph cg_from_script;
-    		try
-        	{
-    			cg_from_script = fParser.parse("/home/baykovr/Git/nuovo-fresco/test-script.fre");
-    			if(cg_from_script != null)
-    			{
-    				fModManager.set_callgraph(cg_from_script);
-    			}
-        	}
-        	catch(Exception e)
-        	{
-        		fLogger.logErro("CORE"," call graph failure : "+e);
-        	}
+    		fLogger.logErro("CORE"," not in ready state, aborting startup.");
     	}
     	else
     	{
-    		fLogger.logErro("FRESCO CORE CRT","failure. ");
-    		if(fLogger == null)
-    		{
-    			fLogger.logErro("FRESCO CORE DBG","failed to initiallize logger.");
-    			
-    		}
-    		if(fModManager == null)
-    		{
-    			fLogger.logErro("FRESCO CORE DBG","failed to initiallize fresco module manager.");
-    		}
-    		return; //do not register event listeners.
+    		fLogger.logInfo("CORE","startUp...");
     	}
+    	
+		/* startUp FRESCO
+		 * 1. construct CallGraph from script
+		 * 2. pass CallGraph to module manager to register
+		 * 3. register event hooks 
+		 * */
+		FrescoCallGraph cg_from_script = null;
+		try
+    	{
+			cg_from_script = fParser.parse(scriptFile);
+			
+			if(cg_from_script != null)
+			{
+				fModManager.set_callgraph(cg_from_script); // TODO : .add_callgraph (support multiple)
+				fModManager.process_callgraphs();
+			}
+			else
+			{
+				fLogger.logErro("CORE"," CallGraph construction failed for "+scriptFile);
+			}
+    	}
+    	catch(Exception e)
+    	{
+    		fLogger.logErro("CORE"," CallGraph general failure : "+e);
+    	}
+
     	
     	/*Register OFMessageListeners*/
     	for( OFType OFType_toLog: FR_OF_MsgTypes)

@@ -5,6 +5,8 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.floodlightcontroller.fresco.modules.FrescoModuleAttribute;
+
 /*
  * FrescoParser : 
  * A simple parser for fresco script written in correct syntax,
@@ -15,11 +17,12 @@ public class FrescoParser
 {
 	private FrescoLogger log;
 	
-	private FrescoCallGraph callgraph;
+	private FrescoCallGraph callGraph;
 	
 	private Pattern mod_name_re       = Pattern.compile("_(.*)");
 	private Pattern mod_line_re       = Pattern.compile("(.*):(.*)");
-	private Pattern action_exp_re     = Pattern.compile("(.*):(.*):(.*)");
+	
+	private Pattern action_exp_re     = Pattern.compile("(.*):(.*)");
 	
 	// Ternary [lOperand] [operator] [rOperand] ? [val if true] : [val if false]
 	// ternary_re (left section) ? (right section)
@@ -27,25 +30,28 @@ public class FrescoParser
 
 	private Pattern ternary_re       = Pattern.compile("(.*)\\?(.*)");	
 	private Pattern ternary_left_re  = Pattern.compile("(.*)(==|>|<)(.*)");
-	private Pattern ternary_right_re = Pattern.compile("(.*):(.*)");
+	private Pattern ternary_right_re = Pattern.compile("(.*),(.*)");
 	
 	private Matcher matcher; 
 	
 	public FrescoParser(FrescoLogger log)
 	{
 		this.log = log;
-		callgraph = new FrescoCallGraph();
+		callGraph = new FrescoCallGraph();
 	}
 	public FrescoCallGraph parse(String filename)
 	{
+		// Construct CallGraph
 		readScriptFile(filename);
 		
-		// construct callgraph
-		return callgraph;
+		return callGraph;
 	}
-	private Scanner parse_module(Scanner fscanner)
+	private Scanner parse_module(String moduleName,Scanner fscanner)
 	{
 		String line;
+		
+		callGraph.modCallOrder.add(moduleName);
+		
 		while(fscanner.hasNextLine())
 		{
 			line = fscanner.nextLine();
@@ -54,12 +60,18 @@ public class FrescoParser
 				matcher = mod_line_re.matcher(line);
 				if(matcher.find())
 				{
-					System.out.println("lv " +matcher.group(1).trim());
-					System.out.println("rv " +matcher.group(2).trim());	
+					String attrName  = matcher.group(1).trim();
+					String attrValue = matcher.group(2).trim();
+					
+					System.out.println("DBG : Adding "+
+							moduleName+" "+attrName+" "+attrValue);
+					
+					callGraph.addModuleAttributeMap(moduleName, attrName, attrValue);
+					
 				}
 				else if(line.trim().equals("action"))
 				{
-					System.out.println("Got action, groupc: "+matcher.groupCount());
+					System.out.println("DBG : parse_action : gc "+matcher.groupCount());
 					fscanner = parse_action(fscanner);
 				}
 				else if(line.trim().equals("end"))
@@ -84,10 +96,15 @@ public class FrescoParser
 			if(line.length()>0)
 			{
 				matcher = action_exp_re.matcher(line);
+				
 				if (matcher.find())
 				{
 					String action_type = matcher.group(1).trim();
-					System.out.println("DEBUG: action type : "+action_type);
+					
+//					System.out.println("DBG ActionMatch : 0 : "+matcher.group(0).trim());
+//					System.out.println("DBG ActionMatch : 1 : "+matcher.group(1).trim());
+//					System.out.println("DBG ActionMatch : 2 : "+matcher.group(2).trim());
+
 					switch(action_type)
 					{
 					case "call":
@@ -148,7 +165,7 @@ public class FrescoParser
 				}
 				else
 				{
-					System.out.println("erro action unexpected line : "+line);
+					System.out.println("ERROR action unexpected line : "+line);
 				}
 			}
 		}
@@ -182,8 +199,8 @@ public class FrescoParser
 					   if (matcher.find())
 					   {
 					      module_name = matcher.group(1);
-					      System.out.println("Got module name : "+module_name);
-					      fscanner = parse_module(fscanner);
+					      System.out.println("ParserDBG : module_name : "+module_name);
+					      fscanner = parse_module(module_name,fscanner);
 					   }
 					   
 //					   //Parse module name
