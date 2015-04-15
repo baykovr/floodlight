@@ -168,7 +168,7 @@ public class FrescoModuleManager
 				System.out.println("The incoming OF Message is "+msg.getType() );
 				if(event.equals(msg.getType()))
 				{
-					return modules.get(0).run();
+					modules.get(0).run();
 				}
 			}
 			else
