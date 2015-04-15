@@ -50,7 +50,8 @@ public class FrescoOFLog implements IFloodlightModule, IOFMessageListener, IFres
     public net.floodlightcontroller.core.IListener.Command receive(
             IOFSwitch sw, OFMessage msg, FloodlightContext cntx) 
     {
-       log.info("[ PKT ] got a new packet");
+    	if(FrescoCoreSettings.OFLog_DBG)
+    		{log.info("[ PKT ] got a new packet");}
        return Command.CONTINUE;
     }
 

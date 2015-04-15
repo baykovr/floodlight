@@ -54,7 +54,10 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener, IFresc
     	// onReceive we must return: CONTINUE || STOP 
     	// (optionally) issue open flow message
     	
-    	return Command.CONTINUE;
+    	fLogger.log.info("[ CORE ] got a new packet");
+    	
+    	return fModManager.receive(sw, msg, cntx);
+    	//return Command.CONTINUE;
     }
 
     @Override
@@ -135,15 +138,15 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener, IFresc
 		 * 2. pass CallGraph to module manager to register
 		 * 3. register event hooks 
 		 * */
-		FrescoCallGraph cg_from_script = null;
+		FrescoGlobalTable cg_from_script = null;
 		try
     	{
 			cg_from_script = fParser.parse(scriptFile);
 			
 			if(cg_from_script != null)
 			{
-				fModManager.set_callgraph(cg_from_script); // TODO : .add_callgraph (support multiple)
-				fModManager.process_callgraphs();
+				fModManager.setGlobalTable(cg_from_script); // TODO : .add_callgraph (support multiple)
+				fModManager.procGlobalTable();
 			}
 			else
 			{

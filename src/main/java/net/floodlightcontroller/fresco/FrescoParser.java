@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.floodlightcontroller.fresco.modules.FrescoModuleAttribute;
+import net.floodlightcontroller.fresco.modules.FrescoModuleAction.FR_ActionType;
 
 /*
  * FrescoParser : 
@@ -15,9 +16,9 @@ import net.floodlightcontroller.fresco.modules.FrescoModuleAttribute;
  * */
 public class FrescoParser 
 {
-	private FrescoLogger log;
+	private FrescoLogger fLogger;
 	
-	private FrescoCallGraph callGraph;
+	private FrescoGlobalTable globalTable;
 	
 	private Pattern mod_name_re       = Pattern.compile("_(.*)");
 	private Pattern mod_line_re       = Pattern.compile("(.*):(.*)");
@@ -36,21 +37,29 @@ public class FrescoParser
 	
 	public FrescoParser(FrescoLogger log)
 	{
-		this.log = log;
-		callGraph = new FrescoCallGraph();
+		this.fLogger = log;
+		globalTable = new FrescoGlobalTable();
 	}
-	public FrescoCallGraph parse(String filename)
+	public FrescoGlobalTable parse(String filename)
 	{
 		// Construct CallGraph
 		readScriptFile(filename);
 		
-		return callGraph;
+		return globalTable;
 	}
+	private void ParserDBG(String message)
+	{
+		if(FrescoCoreSettings.Parser_dbg)
+		{
+			fLogger.logInfo("PARSER-DBG", message);
+		}
+	}
+	
 	private Scanner parse_module(String moduleName,Scanner fscanner)
 	{
 		String line;
 		
-		callGraph.modCallOrder.add(moduleName);
+		globalTable.modCallOrder.add(moduleName);
 		
 		while(fscanner.hasNextLine())
 		{
@@ -63,16 +72,16 @@ public class FrescoParser
 					String attrName  = matcher.group(1).trim();
 					String attrValue = matcher.group(2).trim();
 					
-					System.out.println("DBG : Adding "+
+					ParserDBG(" : Adding "+
 							moduleName+" "+attrName+" "+attrValue);
 					
-					callGraph.addModuleAttributeMap(moduleName, attrName, attrValue);
+					globalTable.addModuleAttribute(moduleName, attrName, attrValue);
 					
 				}
 				else if(line.trim().equals("action"))
 				{
-					System.out.println("DBG : parse_action : gc "+matcher.groupCount());
-					fscanner = parse_action(fscanner);
+					ParserDBG(" : parse_action : gc "+matcher.groupCount());
+					fscanner = parse_action(moduleName,fscanner);
 				}
 				else if(line.trim().equals("end"))
 				{
@@ -81,13 +90,13 @@ public class FrescoParser
 				else
 				{
 					// Erro
-					System.out.println("Module Unexpected line : "+line);
+					ParserDBG("Module Unexpected line : "+line);
 				}
 			}
 		}
 		return fscanner;
 	}
-	private Scanner parse_action(Scanner fscanner)
+	private Scanner parse_action(String moduleName,Scanner fscanner)
 	{
 		String line;
 		while(fscanner.hasNextLine())
@@ -101,16 +110,16 @@ public class FrescoParser
 				{
 					String action_type = matcher.group(1).trim();
 					
-//					System.out.println("DBG ActionMatch : 0 : "+matcher.group(0).trim());
-//					System.out.println("DBG ActionMatch : 1 : "+matcher.group(1).trim());
-//					System.out.println("DBG ActionMatch : 2 : "+matcher.group(2).trim());
+//					ParserDBG(("DBG ActionMatch : 0 : "+matcher.group(0).trim());
+//					ParserDBG(("DBG ActionMatch : 1 : "+matcher.group(1).trim());
+//					ParserDBG(("DBG ActionMatch : 2 : "+matcher.group(2).trim());
 
 					switch(action_type)
 					{
 					case "call":
 					{
-						// call module named = matcher.group(2).trim();
-						
+						String callValue = matcher.group(2).trim();
+						globalTable.addModuleAction(moduleName,FR_ActionType.call,callValue);
 						break;
 					}
 					case "eval":
@@ -129,11 +138,11 @@ public class FrescoParser
 								String operator = matcher.group(2).trim();
 								String roperand = matcher.group(3).trim();
 								
-								System.out.println(); 
+								// TODO
 							}
 							else
 							{
-								System.out.println("failed to parse ternary left");
+								ParserDBG("failed to parse ternary left");
 							}
 							
 							// Parse eval logic
@@ -145,17 +154,17 @@ public class FrescoParser
 							}
 							else
 							{
-								System.out.println("failed to parse ternary right");
+								ParserDBG("failed to parse ternary right");
 							}
 						}
 						else
 						{
-							System.out.println("erro in action, no match for eval");
+							ParserDBG("erro in action, no match for eval");
 						}
 						break;
 					}
 					default:
-						System.out.println("erro in action, no such action type "+action_type);
+						ParserDBG("erro in action, no such action type "+action_type);
 						break;
 					}
 				}
@@ -165,7 +174,7 @@ public class FrescoParser
 				}
 				else
 				{
-					System.out.println("ERROR action unexpected line : "+line);
+					ParserDBG("ERROR action unexpected line : "+line);
 				}
 			}
 		}
@@ -198,8 +207,8 @@ public class FrescoParser
 					   
 					   if (matcher.find())
 					   {
-					      module_name = matcher.group(1);
-					      System.out.println("ParserDBG : module_name : "+module_name);
+					      module_name = matcher.group(1).trim();
+					      ParserDBG(" : module_name : "+module_name);
 					      fscanner = parse_module(module_name,fscanner);
 					   }
 					   
@@ -208,7 +217,7 @@ public class FrescoParser
 //					   {
 //						   
 //					   }
-					   log.logInfo("PARSER","module declaration "+line); 
+					   fLogger.logInfo("PARSER","module declaration "+line); 
 				   }
 			   }
 		   }
@@ -218,7 +227,7 @@ public class FrescoParser
 	   }
 	   catch (Exception e) 
 	   {
-	       log.logErro("PARSER",filename+" : "+e);
+	       fLogger.logErro("PARSER",filename+" : "+e);
 	   }
 	}
 }

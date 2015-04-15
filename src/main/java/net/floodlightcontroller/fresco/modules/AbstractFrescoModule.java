@@ -1,5 +1,7 @@
 package net.floodlightcontroller.fresco.modules;
 
+import net.floodlightcontroller.core.IListener.Command;
+
 /*
  * FRESCO Module Specification
  * 
@@ -11,21 +13,27 @@ package net.floodlightcontroller.fresco.modules;
  * @output    : output value name
  * @parameter : configuration parameter
  * @event     : even which triggers execution
- * @action    : some script action
+ * @action    : a script action
  * */
 public abstract class AbstractFrescoModule {
 	
 	public enum Action { ALLOW, DROP }
 	
-	private String name, 
+	public String name, 
 	input, output, 
 	parameter, 
 	event, 
 	action;
 	
-	public AbstractFrescoModule(String name)
+	public AbstractFrescoModule(String newInput,
+			String newOutput,String newParameter,String newEvent,String newAction)
 	{
-		this.name = name; 
+		// TODO : Surely we'll need to adjust action etc
+		input = newInput;
+		output = newOutput;
+		parameter = newParameter;
+		event = newEvent;
+		action = newAction;
 	}
 	
 	public String getName()
@@ -33,9 +41,5 @@ public abstract class AbstractFrescoModule {
 		return name;
 	}
 	
-	public void action()
-	{
-		
-	}
-	
+	public abstract void run();
 }
