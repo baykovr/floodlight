@@ -14,14 +14,19 @@ import net.floodlightcontroller.core.IListener.Command;
  * @event     : even which triggers execution
  * @action    : some script action
  * */
+import net.floodlightcontroller.fresco.FrescoGlobalTable;
 
 public class FM_doaction extends AbstractFrescoModule {
 
-	public FM_doaction(String newInput,
-			String newOutput,String newParameter,String newEvent,String newAction)
+	public FM_doaction(
+			FrescoGlobalTable newGlobalTable,
+			String newInput,String newOutput,
+			String newParameter,
+			String newEvent,
+			AbstractFrescoModuleAction newAction)
 	{
-		super(newInput,newOutput,newParameter,newEvent,newAction);
-		// TODO Auto-generated constructor stub\
+		super(newGlobalTable,newInput,newOutput,newParameter,newEvent,newAction);
+		// TODO Auto-generated constructor stub
 		name = "doaction";
 	}
 	public void run()

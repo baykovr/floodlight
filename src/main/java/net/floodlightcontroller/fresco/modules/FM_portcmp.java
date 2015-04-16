@@ -1,6 +1,7 @@
 package net.floodlightcontroller.fresco.modules;
 
 import net.floodlightcontroller.core.IListener.Command;
+import net.floodlightcontroller.fresco.FrescoGlobalTable;
 
 /*
  * FRESCO Module Specification
@@ -18,10 +19,14 @@ import net.floodlightcontroller.core.IListener.Command;
 
 public class FM_portcmp extends AbstractFrescoModule{
 
-	public FM_portcmp(String newInput,
-			String newOutput,String newParameter,String newEvent,String newAction)
+	public FM_portcmp(
+			FrescoGlobalTable newGlobalTable,
+			String newInput,String newOutput,
+			String newParameter,
+			String newEvent,
+			AbstractFrescoModuleAction newAction)
 	{
-		super(newInput,newOutput,newParameter,newEvent,newAction);
+		super(newGlobalTable,newInput,newOutput,newParameter,newEvent,newAction);
 		
 		name = "portcmp";
 	}

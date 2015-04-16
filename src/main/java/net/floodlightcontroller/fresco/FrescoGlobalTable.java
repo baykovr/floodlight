@@ -3,8 +3,7 @@ package net.floodlightcontroller.fresco;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import net.floodlightcontroller.fresco.modules.FrescoModuleAction;
-import net.floodlightcontroller.fresco.modules.FrescoModuleAction.FR_ActionType;
+import net.floodlightcontroller.fresco.modules.AbstractFrescoModuleAction;
 import net.floodlightcontroller.fresco.modules.FrescoModuleAttribute;
 
 // TODO : Error reporting
@@ -21,13 +20,13 @@ public class FrescoGlobalTable
 	// Contains module attribute entries
 	protected ArrayList<FrescoModuleAttribute> modAttributes;
 	
-	protected ArrayList<FrescoModuleAction>modActions; 
+	protected HashMap<String,AbstractFrescoModuleAction>modActions; 
 	
 	public FrescoGlobalTable()
 	{
 		modCallOrder  = new ArrayList<String>();
 		modAttributes = new ArrayList<FrescoModuleAttribute>();
-		modActions    = new ArrayList<FrescoModuleAction>();
+		modActions    = new HashMap<String,AbstractFrescoModuleAction>(); //TODO : -> Hash to Array of Actions
 		valueTable    = new HashMap<String,String>();
 	}
 	
@@ -81,15 +80,17 @@ public class FrescoGlobalTable
 			modAttributes.add(new FrescoModuleAttribute(moduleName,modAttrName,modAttrValue));
 		}
 	}
-	public void addModuleAction(String moduleName,FR_ActionType actionType, String actionValue)
+	public void addModuleAction(String moduleName,AbstractFrescoModuleAction newAction)
 	{
-		if(moduleName.isEmpty() || actionType == null || actionValue == null)
+		// Action is allowed to be null
+		
+		if(moduleName.isEmpty())
 		{
 			System.out.println("Warning: null/empty module action name/value/type in script.");
 		}
 		else
 		{
-			modActions.add(new FrescoModuleAction(moduleName,actionType,actionValue));
+			modActions.put(moduleName,newAction);
 		}
 	}
 }

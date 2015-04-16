@@ -1,6 +1,7 @@
 package net.floodlightcontroller.fresco;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.projectfloodlight.openflow.protocol.OFMessage;
 import org.projectfloodlight.openflow.protocol.OFType;
@@ -10,7 +11,8 @@ import net.floodlightcontroller.core.IOFSwitch;
 import net.floodlightcontroller.core.IListener.Command;
 import net.floodlightcontroller.fresco.modules.AbstractFrescoModule;
 import net.floodlightcontroller.fresco.modules.FM_portcmp;
-import net.floodlightcontroller.fresco.modules.FrescoModuleAction;
+import net.floodlightcontroller.fresco.modules.AbstractFrescoModuleAction;
+import net.floodlightcontroller.fresco.modules.FrescoModuleActionCall;
 import net.floodlightcontroller.fresco.modules.FrescoModuleAttribute;
 
 /*
@@ -21,14 +23,14 @@ import net.floodlightcontroller.fresco.modules.FrescoModuleAttribute;
 
 public class FrescoModuleManager 
 {
-	private ArrayList<AbstractFrescoModule> modules;
+	private HashMap<String,AbstractFrescoModule> modules;
 	private FrescoGlobalTable globalTable;
 	private FrescoLogger fLogger;
 	
 	public FrescoModuleManager(FrescoLogger flogger)
 	{
 		fLogger = flogger;
-		modules = new ArrayList<AbstractFrescoModule>();
+		modules = new HashMap<String,AbstractFrescoModule>();
 	}
 	
 	public void setGlobalTable(FrescoGlobalTable newGlobalTable)
@@ -59,10 +61,9 @@ public class FrescoModuleManager
 			System.out.println(moduleAttr.toString());
 		}
 		
-		
-		for(FrescoModuleAction moduleAction : globalTable.modActions)
+		for(String moduleName : globalTable.modActions.keySet())
 		{
-			System.out.println(moduleAction.toString());
+			System.out.println("[ACTION]"+"["+moduleName+"] "+globalTable.modActions.get(moduleName).toString());
 		}
 		
 		// Initialization and hand off
@@ -80,6 +81,7 @@ public class FrescoModuleManager
 		String output = null;
 		String parameter = null;
 		String event = null;
+		AbstractFrescoModuleAction action = null;
 		
 		// Search for configuration options in modAttributes
 		for(FrescoModuleAttribute moduleAttr : globalTable.modAttributes)
@@ -120,16 +122,21 @@ public class FrescoModuleManager
 				
 				}
 			}//if()
+			
+			action = globalTable.modActions.get(moduleName);
+			
 		}
+			// A module is not required to have an associated action.
 			if(input != null && output != null && parameter != null && event != null)
 			{
 				switch(moduleName)
 				{
 					case "portcmp":
 					{
-						FM_portcmp portcmp = new FM_portcmp(input,output,parameter,event,"none");
+						FM_portcmp portcmp = new FM_portcmp(globalTable,input,output,parameter,event,action);
 						
-						modules.add(portcmp);
+						// TODO : to do type system
+						modules.put("portcmp",portcmp);
 						
 						break;
 					}
@@ -168,7 +175,14 @@ public class FrescoModuleManager
 				System.out.println("The incoming OF Message is "+msg.getType() );
 				if(event.equals(msg.getType()))
 				{
+					//process module runtime
 					modules.get(0).run();
+					if(modules.get(0).action instanceof FrescoModuleActionCall)
+					{
+						
+						
+					}
+					
 				}
 			}
 			else
@@ -181,22 +195,5 @@ public class FrescoModuleManager
 			fLogger.logErro("ModuleManager","Has no global value table loaded!");
 		}
 		return Command.CONTINUE;
-	}
-	public void add(AbstractFrescoModule module)
-	{
-		modules.add(module);
-	}
-
-	public void load()
-	{
-		for(AbstractFrescoModule module : modules)
-		{
-			
-		}
-	}
-
-	public void unload(AbstractFrescoModule module)
-	{
-		
 	}
 }

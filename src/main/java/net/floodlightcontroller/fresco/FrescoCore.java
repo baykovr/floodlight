@@ -49,15 +49,7 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener, IFresc
     @Override
     public net.floodlightcontroller.core.IListener.Command receive(
             IOFSwitch sw, OFMessage msg, FloodlightContext cntx) {
-        // TODO Auto-generated method stub
-    	
-    	// onReceive we must return: CONTINUE || STOP 
-    	// (optionally) issue open flow message
-    	
-    	fLogger.log.info("[ CORE ] got a new packet");
-    	
     	return fModManager.receive(sw, msg, cntx);
-    	//return Command.CONTINUE;
     }
 
     @Override
@@ -85,8 +77,7 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener, IFresc
     public void init(FloodlightModuleContext context)
             throws FloodlightModuleException 
     {
-    	 
-    	
+
     	floodlightProvider = context.getServiceImpl(IFloodlightProviderService.class);
     	fLogger            = new FrescoLogger();
     	fParser            = new FrescoParser(fLogger);
@@ -115,8 +106,6 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener, IFresc
 			fLogger.logErro("FRESCO CORE DBG","failed to initiallize fresco module manager.");
 			core_ready = false;
 		}
-
-    	
     }
 
     @Override
@@ -133,19 +122,15 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener, IFresc
     		fLogger.logInfo("CORE","startUp...");
     	}
     	
-		/* startUp FRESCO
-		 * 1. construct CallGraph from script
-		 * 2. pass CallGraph to module manager to register
-		 * 3. register event hooks 
-		 * */
-		FrescoGlobalTable cg_from_script = null;
+		FrescoGlobalTable globalTable = null;
 		try
     	{
-			cg_from_script = fParser.parse(scriptFile);
+			globalTable = fParser.parse(scriptFile);
 			
-			if(cg_from_script != null)
+			if(globalTable != null)
 			{
-				fModManager.setGlobalTable(cg_from_script); // TODO : .add_callgraph (support multiple)
+				// TODO: Support multiple table additions
+				fModManager.setGlobalTable(globalTable);
 				fModManager.procGlobalTable();
 			}
 			else
@@ -157,9 +142,8 @@ public class FrescoCore implements IFloodlightModule, IOFMessageListener, IFresc
     	{
     		fLogger.logErro("CORE"," CallGraph general failure : "+e);
     	}
-
-    	
-    	/*Register OFMessageListeners*/
+		
+    	// Register event listeners and hand off to module manager on recieve.
     	for( OFType OFType_toLog: FR_OF_MsgTypes)
     	{
     		try

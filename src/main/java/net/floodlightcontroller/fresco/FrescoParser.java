@@ -5,12 +5,12 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.floodlightcontroller.fresco.modules.FrescoModuleActionCall;
 import net.floodlightcontroller.fresco.modules.FrescoModuleAttribute;
-import net.floodlightcontroller.fresco.modules.FrescoModuleAction.FR_ActionType;
 
 /*
  * FrescoParser : 
- * A simple parser for fresco script written in correct syntax,
+ * A simple parser for FRESCO script written in correct syntax,
  * works well on correctly written script.
  * TODO : Error Handling, and better syntax checking. 04.07.15
  * */
@@ -119,7 +119,8 @@ public class FrescoParser
 					case "call":
 					{
 						String callValue = matcher.group(2).trim();
-						globalTable.addModuleAction(moduleName,FR_ActionType.call,callValue);
+						globalTable.addModuleAction(moduleName,new FrescoModuleActionCall(callValue));
+						
 						break;
 					}
 					case "eval":
@@ -194,7 +195,7 @@ public class FrescoParser
 			   if(line.length()>0)
 			   {
 				   // Comment Line
-				   if(line.charAt(0) == '#')
+				   if(line.trim().charAt(0) == '#')
 				   {
 					   //log.logInfo("Comment line "+line);
 				   }
