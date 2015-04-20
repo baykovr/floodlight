@@ -11,7 +11,7 @@ import net.floodlightcontroller.fresco.modules.FrescoModuleAttribute;
 public class FrescoGlobalTable 
 {
 	// Order in which modules are executed
-	protected ArrayList<String> modCallOrder;
+	public ArrayList<String> modCallOrder;
 	
 	// Table of variables, name and values
 	// which the modules will update/reference

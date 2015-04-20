@@ -13,6 +13,7 @@ import net.floodlightcontroller.fresco.modules.AbstractFrescoModule;
 import net.floodlightcontroller.fresco.modules.FM_portcmp;
 import net.floodlightcontroller.fresco.modules.AbstractFrescoModuleAction;
 import net.floodlightcontroller.fresco.modules.FrescoModuleActionCall;
+import net.floodlightcontroller.fresco.modules.FrescoModuleActionEval;
 import net.floodlightcontroller.fresco.modules.FrescoModuleAttribute;
 
 /*
@@ -158,14 +159,24 @@ public class FrescoModuleManager
 				return;
 			}
 	}
-
+	public void invokeModule()
+	{
+		
+	}
 	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx)
 	{
 		fLogger.log.info("[ ModuleManager ] got a new packet");
 		
 		if(globalTable != null)
 		{
-			// find modules with hook points and run them
+			//
+//			for(String moduleName : globalTable.modCallOrder)
+//			{
+//				
+//			}
+//			
+			
+			//
 			if(modules.size() > 0)
 			{
 				String event = modules.get(0).event;
@@ -177,8 +188,22 @@ public class FrescoModuleManager
 				{
 					//process module runtime
 					modules.get(0).run();
+					
 					if(modules.get(0).action instanceof FrescoModuleActionCall)
 					{
+						// invoke the module by name
+						FrescoModuleActionCall call = modules.get(0).action;
+						
+						String test = call.value;
+						
+					}
+					else if(modules.get(0).action instanceof FrescoModuleActionEval)
+					{
+						
+					}
+					else
+					{
+						//Module action is unknown or none
 						
 						
 					}
