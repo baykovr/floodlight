@@ -1,5 +1,9 @@
 package net.floodlightcontroller.fresco.modules;
 
+import org.projectfloodlight.openflow.protocol.OFMessage;
+
+import net.floodlightcontroller.core.FloodlightContext;
+import net.floodlightcontroller.core.IOFSwitch;
 import net.floodlightcontroller.core.IListener.Command;
 import net.floodlightcontroller.fresco.FrescoGlobalTable;
 
@@ -49,5 +53,7 @@ public abstract class AbstractFrescoModule {
 		return name;
 	}
 	
-	public abstract void run();
+	public abstract void run(IOFSwitch sw, OFMessage msg, FloodlightContext cntx);
+	// eval is used when the module is returning an OF Command.
+	public abstract Command runEval(IOFSwitch sw, OFMessage msg, FloodlightContext cntx);
 }

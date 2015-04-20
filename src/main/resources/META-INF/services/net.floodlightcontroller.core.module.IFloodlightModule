@@ -8,6 +8,8 @@ net.floodlightcontroller.debugevent.DebugEventService
 net.floodlightcontroller.threadpool.ThreadPool
 net.floodlightcontroller.perfmon.PktInProcessingTime
 net.floodlightcontroller.restserver.RestApiServer
+net.floodlightcontroller.fresco.FrescoCore
+net.floodlightcontroller.fresco.FrescoOFLog
 net.floodlightcontroller.ui.web.StaticWebRoutable
 net.floodlightcontroller.virtualnetwork.VirtualNetworkFilter
 net.floodlightcontroller.devicemanager.internal.DefaultEntityClassifier
@@ -24,5 +26,3 @@ net.floodlightcontroller.loadbalancer.LoadBalancer
 net.floodlightcontroller.linkdiscovery.internal.LinkDiscoveryManager
 net.floodlightcontroller.devicemanager.internal.DeviceManagerImpl
 net.floodlightcontroller.firewall.Firewall
-net.floodlightcontroller.fresco.FrescoCore
-net.floodlightcontroller.fresco.FrescoOFLog

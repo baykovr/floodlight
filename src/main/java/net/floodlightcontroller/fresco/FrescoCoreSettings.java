@@ -14,6 +14,6 @@ public class FrescoCoreSettings {
 		public final static boolean Log_erro = true;
 		
 	//Parser Debug Information
-		public final static boolean Parser_dbg     = true;
-		public final static boolean Parser_verbose = true;
+		public final static boolean Parser_dbg     = false;
+		public final static boolean Parser_verbose = false;
 }

@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.floodlightcontroller.fresco.modules.FrescoModuleActionCall;
+import net.floodlightcontroller.fresco.modules.FrescoModuleActionEval;
 import net.floodlightcontroller.fresco.modules.FrescoModuleAttribute;
 
 /*
@@ -31,6 +32,8 @@ public class FrescoParser
 
 	private Pattern ternary_re       = Pattern.compile("(.*)\\?(.*)");	
 	private Pattern ternary_left_re  = Pattern.compile("(.*)(==|>|<)(.*)");
+	private Pattern ternary_left_inner_re = Pattern.compile("(.*):(.*)");
+	
 	private Pattern ternary_right_re = Pattern.compile("(.*),(.*)");
 	
 	private Matcher matcher; 
@@ -128,6 +131,13 @@ public class FrescoParser
 						matcher = ternary_re.matcher(line);
 						if(matcher.find()) // valid ternary expression
 						{
+							String leftVarKey    = null;
+							String rightVarKey   = null;
+							
+							String operator      = null;
+							String actionIfTrue  = null;
+							String actionIfFalse = null;
+	
 							String ternary_left  = matcher.group(1).trim(); 
 							String ternary_right = matcher.group(2).trim();
 							
@@ -135,11 +145,20 @@ public class FrescoParser
 							matcher = ternary_left_re.matcher(ternary_left);
 							if(matcher.find())
 							{
-								String loperand = matcher.group(1).trim();
-								String operator = matcher.group(2).trim();
-								String roperand = matcher.group(3).trim();
+								operator    = matcher.group(2).trim();
+								rightVarKey = matcher.group(3).trim();
 								
-								// TODO
+								matcher = ternary_left_inner_re.matcher(matcher.group(1).trim());
+								
+								if(matcher.find())
+								{
+									leftVarKey = matcher.group(2).trim();
+								}
+								else
+								{
+									ParserDBG("failed to parse ternary left inner");
+								}
+								ParserDBG("[ACTION LEFT VALUES] "+leftVarKey+" "+operator+" "+rightVarKey);
 							}
 							else
 							{
@@ -150,13 +169,21 @@ public class FrescoParser
 							matcher = ternary_right_re.matcher(ternary_right);
 							if(matcher.find())
 							{
-								String eval_if_true  = matcher.group(1).trim();
-								String eval_if_false = matcher.group(2).trim();
+								actionIfTrue  = matcher.group(1).trim();
+								actionIfFalse = matcher.group(2).trim();
 							}
 							else
 							{
 								ParserDBG("failed to parse ternary right");
 							}
+							// TODO Null check
+							
+							globalTable.addModuleAction(moduleName, 
+									new FrescoModuleActionEval(
+											leftVarKey,operator,rightVarKey,
+											actionIfTrue,
+											actionIfFalse));
+							
 						}
 						else
 						{

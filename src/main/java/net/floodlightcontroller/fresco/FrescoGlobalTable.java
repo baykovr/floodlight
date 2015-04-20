@@ -15,7 +15,7 @@ public class FrescoGlobalTable
 	
 	// Table of variables, name and values
 	// which the modules will update/reference
-	protected HashMap<String,String> valueTable;
+	public HashMap<String,String> valueTable;
 	
 	// Contains module attribute entries
 	protected ArrayList<FrescoModuleAttribute> modAttributes;
@@ -28,6 +28,15 @@ public class FrescoGlobalTable
 		modAttributes = new ArrayList<FrescoModuleAttribute>();
 		modActions    = new HashMap<String,AbstractFrescoModuleAction>(); //TODO : -> Hash to Array of Actions
 		valueTable    = new HashMap<String,String>();
+		
+		// TODO : Refactor this. (man I wish there was a time extension...)
+		//Add Basic Booleans
+		valueTable.put("1","1");
+		valueTable.put("0","0");
+		valueTable.put("True","1");
+		valueTable.put("False","0");
+		valueTable.put("true","1");
+		valueTable.put("false","0");
 	}
 	
 	public void initValueTable()

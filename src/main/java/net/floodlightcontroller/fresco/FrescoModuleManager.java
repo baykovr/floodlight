@@ -10,6 +10,7 @@ import net.floodlightcontroller.core.FloodlightContext;
 import net.floodlightcontroller.core.IOFSwitch;
 import net.floodlightcontroller.core.IListener.Command;
 import net.floodlightcontroller.fresco.modules.AbstractFrescoModule;
+import net.floodlightcontroller.fresco.modules.FM_doaction;
 import net.floodlightcontroller.fresco.modules.FM_portcmp;
 import net.floodlightcontroller.fresco.modules.AbstractFrescoModuleAction;
 import net.floodlightcontroller.fresco.modules.FrescoModuleActionCall;
@@ -72,8 +73,7 @@ public class FrescoModuleManager
 		
 		for(String variableName : globalTable.valueTable.keySet())
 		{
-			System.out.println("Variable: "+variableName+" "+globalTable.valueTable.get(variableName));
-		}
+			fLogger.logInfo("ModuleManager GlobalTable View","Variable: "+variableName+" "+globalTable.valueTable.get(variableName));		}
 	}
 	public void addModule(String moduleName)
 	{
@@ -143,6 +143,8 @@ public class FrescoModuleManager
 					}
 					case "doaction":
 					{
+						FM_doaction doaction = new FM_doaction(globalTable,input,output,parameter,event,action);
+						modules.put("doaction",doaction);
 						break;
 					}
 					default:
@@ -163,53 +165,89 @@ public class FrescoModuleManager
 	{
 		
 	}
+	private Command runModules(String firstModuleName,IOFSwitch sw, OFMessage msg, FloodlightContext cntx)
+	{
+		fLogger.logInfo("ModuleManager : runModules", 
+				"Referencing Module : "+firstModuleName);
+		
+		AbstractFrescoModule module = modules.get(firstModuleName);
+		if(module == null)
+		{
+			fLogger.logErro("ModuleManager : runModules", 
+					"Module event is hooked but no such module is loaded : "+firstModuleName);
+			return Command.CONTINUE;
+		}
+		
+		if(module.action instanceof FrescoModuleActionCall)
+		{
+			// invoke the module by name
+			fLogger.logInfo("ModuleManager : runModules", 
+					"Invoking Module : "+firstModuleName);
+			module.run(sw,msg,cntx);
+			
+			FrescoModuleActionCall call = (FrescoModuleActionCall)module.action;
+			
+			//Recurse to next module
+			//	call.value is the name of the next module to invoke
+			return runModules(call.value,sw,msg,cntx);
+		}
+		else if(module.action instanceof FrescoModuleActionEval)
+		{
+			// Process action
+			// TODO: _Heavily_ refactor
+			fLogger.logInfo("ModuleManager : runModules", 
+					"Invoking Module : "+firstModuleName);
+			
+			return module.runEval(sw,msg,cntx);
+		}
+		else
+		{
+			//Module action is unknown or none
+			// can be null if module has no action, however
+			// if the action is null we have not handled it properly
+			if(module.action != null)
+			{
+				fLogger.logErro("ModuleManager : runModules", 
+						"Unknown action : "+module.action.toString());
+			}
+			else
+			{
+				fLogger.logInfo("ModuleManager : runModules", 
+						"Null Action : "+firstModuleName);
+			}
+			return Command.CONTINUE;
+		}
+	}
+	
 	public Command receive(IOFSwitch sw, OFMessage msg, FloodlightContext cntx)
 	{
 		fLogger.log.info("[ ModuleManager ] got a new packet");
 		
 		if(globalTable != null)
 		{
-			//
-//			for(String moduleName : globalTable.modCallOrder)
-//			{
-//				
-//			}
-//			
-			
-			//
-			if(modules.size() > 0)
+			String firstModuleName = null;
+			String firstModuleEvent = null;
+			if(globalTable.modCallOrder.size() > 0)
 			{
-				String event = modules.get(0).event;
+				firstModuleName  = globalTable.modCallOrder.get(0);
+				firstModuleEvent = modules.get(firstModuleName).event;
 				
-				System.out.println("The first module, event is ... "+event);
-				//OFType.PACKET_IN
-				System.out.println("The incoming OF Message is "+msg.getType() );
-				if(event.equals(msg.getType()))
+				//Warning: Only hooking OFType.PACKET_IN in CORE ATM
+				System.out.println("The first module,       is ... "+firstModuleName);
+				System.out.println("The first module, event is ... "+firstModuleEvent);
+				System.out.println("The incoming OF Message is ... "+msg.getType());
+
+				// Event Matches first module in chain
+				if(firstModuleEvent.equals(msg.getType().toString()))
 				{
-					//process module runtime
-					modules.get(0).run();
+					System.out.println("Module Event Match");
+					// chain module invocations
 					
-					if(modules.get(0).action instanceof FrescoModuleActionCall)
-					{
-						// invoke the module by name
-						FrescoModuleActionCall call = modules.get(0).action;
-						
-						String test = call.value;
-						
-					}
-					else if(modules.get(0).action instanceof FrescoModuleActionEval)
-					{
-						
-					}
-					else
-					{
-						//Module action is unknown or none
-						
-						
-					}
+					return runModules(firstModuleName,sw,msg,cntx);
 					
 				}
-			}
+				System.out.println("No Event Match");
+			}//if()
 			else
 			{
 				fLogger.logWarn("ModuleManager","Has no FRESCO modules loaded.");
